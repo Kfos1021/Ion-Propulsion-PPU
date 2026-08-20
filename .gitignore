@@ -1,0 +1,19 @@
+# LTspice build artifacts & simulation outputs
+*.raw
+*.log
+*.op.raw
+
+# C++ / Build binaries
+*.o
+*.exe
+build/
+
+# Python cache & telemetry log files
+__pycache__/
+*.pyc
+*.csv
+
+# KiCad temporary & backup files
+*-backups/
+*.bck
+*.lck
