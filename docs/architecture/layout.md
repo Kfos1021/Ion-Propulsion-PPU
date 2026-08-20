@@ -1,0 +1,3 @@
+Power Flow: 24 V Spacecraft Bus -> Input Filter & Protection Block -> 4 Parallel DC-DC Power Stages (Beam, Discharge, Neutralizer, Aux) -> Sensor Blocks (Voltage/Current Sensing) -> Output Connectors.  
+Control & Telemetry Flow: Sensing Blocks -> C++ Controller Analog Inputs -> C++ State Machine Decisions -> PWM Gate Drivers / Channel Enable Switches.  
+Software-in-the-Loop (SiL) Interface: C++ Controller Commands -> IPC Pipe/Socket Interface -> Python Dynamic Thruster Plant Model -> Real-time Ground Station Telemetry Dashboard.
