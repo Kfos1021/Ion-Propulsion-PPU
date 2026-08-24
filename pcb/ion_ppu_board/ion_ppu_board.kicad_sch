@@ -3251,7 +3251,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 96.2152 85.09 0)
 			(hide yes)
 			(show_name no)
@@ -3330,7 +3330,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Inductor_SMD:L_12x12mm_H8mm"
 			(at 59.69 82.55 0)
 			(hide yes)
 			(show_name no)
@@ -3412,7 +3412,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 41.402 90.17 90)
 			(hide yes)
 			(show_name no)
@@ -3492,7 +3492,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
 			(at 107.95 74.93 0)
 			(hide yes)
 			(show_name no)
@@ -3652,7 +3652,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 41.402 102.87 90)
 			(hide yes)
 			(show_name no)
@@ -3734,7 +3734,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
 			(at 184.15 95.25 0)
 			(hide yes)
 			(show_name no)
@@ -3930,7 +3930,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
 			(at 67.31 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -4012,7 +4012,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 53.0352 93.98 0)
 			(hide yes)
 			(show_name no)
@@ -4403,7 +4403,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
 			(at 69.85 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -4488,7 +4488,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 83.312 95.25 90)
 			(hide yes)
 			(show_name no)
@@ -4570,7 +4570,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
 			(at 135.89 71.12 0)
 			(hide yes)
 			(show_name no)
@@ -4653,7 +4653,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Inductor_SMD:L_12x12mm_H8mm"
 			(at 107.95 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -4735,7 +4735,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
 			(at 83.312 83.82 90)
 			(hide yes)
 			(show_name no)
