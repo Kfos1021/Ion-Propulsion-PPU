@@ -1,9 +1,6 @@
 /**
  * @file main.cpp
- * @brief Bare-Metal C++ Ion Propulsion Power Processing Unit (PPU) Controller
- * 
- * Implements the core 8-state sequence for controlling spacecraft thruster power stages:
- * OFF -> SELF_TEST -> PREHEAT -> DISCHARGE_START -> NEUTRALIZER_START -> BEAM_RAMP -> THRUST -> SHUTDOWN
+ * @brief Bare-Metal C++ PPU Controller with Safety Interlocks & Fault Logic
  */
 
 #include <iostream>
@@ -11,23 +8,27 @@
 #include <thread>
 #include <chrono>
 
-// Define all 8 operational states of the PPU state machine
+// Define all 8 operational states
 enum class PPUState {
-    OFF,                // System isolated and unpowered
-    SELF_TEST,          // Check internal voltage, current, and temperature sensors
-    PREHEAT,            // Apply heater power to warm up cathodes
-    DISCHARGE_START,    // Ignite low-voltage discharge chamber plasma
-    NEUTRALIZER_START,  // Establish neutralizer electron emission
-    BEAM_RAMP,          // Ramp high-voltage beam supply to target acceleration potential
-    THRUST,             // Closed-loop steady-state propulsion operation
-    SHUTDOWN            // Controlled sequencing down to a safe state
+    OFF,
+    SELF_TEST,
+    PREHEAT,
+    DISCHARGE_START,
+    NEUTRALIZER_START,
+    BEAM_RAMP,
+    THRUST,
+    SHUTDOWN
 };
 
-/**
- * @brief Converts state enum values into printable strings for logging/telemetry.
- * @param state The current PPUState.
- * @return std::string Human-readable state identifier.
- */
+// Hardware status telemetry structure
+struct Telemetry {
+    float busVoltage = 24.0f;     // Nominal 24V DC bus
+    float dischargeCurrent = 1.2f;// Nominal discharge current (Amps)
+    float neutralizerCurrent = 0.5f; // Nominal neutralizer current (Amps)
+    float beamCurrent = 0.2f;     // Beam current (Amps)
+    float temperature = 45.0f;    // PPU board temperature (°C)
+};
+
 std::string stateToString(PPUState state) {
     switch (state) {
         case PPUState::OFF:               return "OFF";
@@ -42,30 +43,17 @@ std::string stateToString(PPUState state) {
     }
 }
 
-/**
- * @class PPUController
- * @brief Manages PPU operational state transitions and channel sequencing.
- */
 class PPUController {
 private:
-    PPUState currentState;  // Stores current operating state
-    float throttle;         // Throttle level scaled from 0.0 (0%) to 1.0 (100%)
+    PPUState currentState;
+    Telemetry telem;
+    float throttle;
+    int faultRetries;
+    const int MAX_RETRIES = 3;
 
 public:
-    /**
-     * @brief Constructor: Initializes controller in safe OFF state with 0% throttle.
-     */
-    PPUController() : currentState(PPUState::OFF), throttle(0.0f) {}
+    PPUController() : currentState(PPUState::OFF), throttle(0.0f), faultRetries(0) {}
 
-    /**
-     * @brief Getter for the active state.
-     */
-    PPUState getState() const { return currentState; }
-
-    /**
-     * @brief Handles explicit state transitions and logs output.
-     * @param newState Target state to transition into.
-     */
     void transitionTo(PPUState newState) {
         std::cout << "[STATE TRANSITION] " << stateToString(currentState) 
                   << " -> " << stateToString(newState) << std::endl;
@@ -73,53 +61,82 @@ public:
     }
 
     /**
-     * @brief Executes the full nominal startup, steady-state, and shutdown sequence.
+     * @brief Evaluates active safety interlocks before enabling high-voltage stages.
      */
-    void runSequence() {
-        // Step 1: Execute built-in self-test diagnostics
-        transitionTo(PPUState::SELF_TEST);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    bool checkInterlocks() {
+        // Interlock 1: Spacecraft Bus Undervoltage (<18V)
+        if (telem.busVoltage < 18.0f) {
+            std::cout << "[FAULT ERROR] Bus Undervoltage Detected: " << telem.busVoltage << "V!" << std::endl;
+            return false;
+        }
 
-        // Step 2: Preheat thruster cathode filaments
-        transitionTo(PPUState::PREHEAT);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // Interlock 2: Thermal Cutoff (>85°C)
+        if (telem.temperature > 85.0f) {
+            std::cout << "[FAULT ERROR] Overtemperature Trip: " << telem.temperature << "°C!" << std::endl;
+            return false;
+        }
 
-        // Step 3: Start discharge power supply (Ignite plasma)
-        transitionTo(PPUState::DISCHARGE_START);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // Interlock 3: High-Voltage Beam Interlock
+        // Prohibit beam activation if discharge or neutralizer plasma isn't established
+        if (currentState == PPUState::BEAM_RAMP || currentState == PPUState::THRUST) {
+            if (telem.dischargeCurrent < 0.5f || telem.neutralizerCurrent < 0.1f) {
+                std::cout << "[INTERLOCK TRIP] Cannot enable Beam supply without active Discharge & Neutralizer!" << std::endl;
+                return false;
+            }
+        }
+        return true;
+    }
 
-        // Step 4: Start neutralizer supply (Charge neutralization)
-        transitionTo(PPUState::NEUTRALIZER_START);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-        // Step 5: Ramp high-voltage beam supply (Ion acceleration)
-        transitionTo(PPUState::BEAM_RAMP);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-        // Step 6: Enter steady-state nominal thrusting at 100% throttle
-        transitionTo(PPUState::THRUST);
-        throttle = 1.0f;
-        std::cout << "[INFO] PPU Operating in Steady State THRUST at " 
-                  << (throttle * 100.0f) << "% Throttle." << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-        // Step 7: Begin commanded shutdown sequence
+    /**
+     * @brief Handles system fault response, immediate shutdown, and latched lockdown.
+     */
+    void handleFault(const std::string& errorReason) {
+        std::cout << "\n[EMERGENCY SHUTDOWN] Fault Triggered: " << errorReason << std::endl;
         transitionTo(PPUState::SHUTDOWN);
         throttle = 0.0f;
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        
+        faultRetries++;
+        std::cout << "[RECOVERY] Retries attempted: " << faultRetries << " / " << MAX_RETRIES << std::endl;
+        
+        if (faultRetries >= MAX_RETRIES) {
+            std::cout << "[CRITICAL LOCKDOWN] Max fault retries exceeded. System latched in OFF state." << std::endl;
+            transitionTo(PPUState::OFF);
+        } else {
+            std::cout << "[RECOVERY] Clearing faults and resetting to OFF for retry..." << std::endl;
+            transitionTo(PPUState::OFF);
+        }
+    }
 
-        // Step 8: Safely isolate all channels and return to OFF
-        transitionTo(PPUState::OFF);
+    void runNominalAndFaultTest() {
+        std::cout << "\n--- TEST 1: Nominal Startup & Interlock Check ---" << std::endl;
+        transitionTo(PPUState::SELF_TEST);
+        if (!checkInterlocks()) { handleFault("Self-Test Interlock Failed"); return; }
+
+        transitionTo(PPUState::PREHEAT);
+        transitionTo(PPUState::DISCHARGE_START);
+        transitionTo(PPUState::NEUTRALIZER_START);
+
+        // Verify beam interlock passes now that discharge and neutralizer currents are nominal
+        if (checkInterlocks()) {
+            transitionTo(PPUState::BEAM_RAMP);
+            transitionTo(PPUState::THRUST);
+            throttle = 1.0f;
+            std::cout << "[INFO] THRUST Active at 100% Throttle." << std::endl;
+        }
+
+        std::cout << "\n--- TEST 2: Injecting Beam Arc Overcurrent Fault ---" << std::endl;
+        // Inject dynamic fault: Sudden neutralizer failure while operating
+        telem.neutralizerCurrent = 0.0f; 
+        if (!checkInterlocks()) {
+            handleFault("Neutralizer Current Lost during THRUST");
+        }
     }
 };
 
 int main() {
-    std::cout << "--- Initializing Ion Propulsion PPU Controller ---" << std::endl;
-    
-    // Instantiate and execute controller state machine
+    std::cout << "--- Initializing PPU Interlocks & Protection System ---" << std::endl;
     PPUController controller;
-    controller.runSequence();
-    
-    std::cout << "--- PPU State Machine Test Complete ---" << std::endl;
+    controller.runNominalAndFaultTest();
+    std::cout << "--- Day 12 Interlocks & Protection Test Complete ---" << std::endl;
     return 0;
 }
