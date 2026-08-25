@@ -1,4 +1,4 @@
-**Spacecraft Ion Propulsion Power Processing Unit**
+# **Spacecraft Ion Propulsion Power Processing Unit**
 
 This Ion Propulsion Power Processing Unit (PPU) is a simulation-first hardware and embedded software project 
 that converts a standard 24 V DC spacecraft bus into four independently regulated power stages: a 50–100 V Boost/Flyback 
