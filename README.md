@@ -11,6 +11,16 @@ socket interface, and a fully routed 2-layer KiCad  PCB layout validated to a De
 **System Diagram of PPU**
 
 
+<img width="972" height="602" alt="v_beam_results" src="https://github.com/user-attachments/assets/7f8ab116-9b2e-4450-8a5d-2e88f6fb765f" />
+
+**Beam Boost Converter Transient & Regulation Response**
+
+
+<img width="1077" height="605" alt="v_discharge_results" src="https://github.com/user-attachments/assets/941c2fc2-ac21-4435-bfc0-05f230a1c3d8" />
+
+**Buck Converter Regulation Response**
+
+
 <img width="490" height="570" alt="Screenshot 2026-08-24 at 9 55 37 PM" src="https://github.com/user-attachments/assets/be5e30c5-2cc3-4c1a-98a9-e31a2af15817" />
 
 **Route Diagram**
