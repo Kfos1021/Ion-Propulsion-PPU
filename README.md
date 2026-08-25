@@ -12,6 +12,11 @@ PCB layout validated to a Design Rule Check (DRC) pass.
 **System Diagram of PPU**
 
 
+<img width="490" height="570" alt="Screenshot 2026-08-24 at 9 55 37 PM" src="https://github.com/user-attachments/assets/be5e30c5-2cc3-4c1a-98a9-e31a2af15817" />
+
+**Route Diagram**
+
+
 
 <img width="1278" height="628" alt="ppu_3d_render" src="https://github.com/user-attachments/assets/2f1f2ed5-c9e6-434b-a06b-df431e46cd9b" />
 
