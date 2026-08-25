@@ -17,3 +17,25 @@ __pycache__/
 *-backups/
 *.bck
 *.lck
+
+# Ignore compiled executables
+ppu_controller
+sil_bridge
+*.o
+*.out
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore OS auto-generated files
+.DS_Store
+
+# Ignore compiled executables
+ppu_controller
+sil_bridge
+*.o
+*.out
+
+# Ignore OS auto-generated files
+.DS_Store
